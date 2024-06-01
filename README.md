@@ -7,7 +7,7 @@ grupo123
 FileZilla:
 servidor: pavlov.ing.puc.cl
 user: grupo123
-password: grupo123
+password: popper123
 port: 22
 
 Instrucciones:
