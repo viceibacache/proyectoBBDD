@@ -7,8 +7,11 @@ grupo123
 FileZilla:
 servidor: pavlov.ing.puc.cl
 user: grupo123
-password: popper123
+password: grupo123
 port: 22
 
 Instrucciones:
 https://github.com/IIC2413/Syllabus-2024-1/wiki/Servidor
+
+
+psql: popper123
