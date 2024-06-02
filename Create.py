@@ -56,7 +56,7 @@ def BorrarTablas():
     conexion.commit()
 
     cursor.execute('''
-    DROP TABLE IF EXISTS DetallesPedido
+    DROP TABLE IF EXISTS platoPedido
     ''')
     conexion.commit()
     
@@ -169,23 +169,20 @@ def createTables(conexion, cursor):
     ''')
     conexion.commit()
     cursor.execute('''
-    CREATE TABLE IF NOT EXISTS DetallesPedido (
-        detallesPedidoID INTEGER PRIMARY KEY AUTOINCREMENT,
+        CREATE TABLE IF NOT EXISTS platoPedido (
+        platoPedidoID INTEGER PRIMARY KEY AUTOINCREMENT,
         platoID INT,
-        cantidad INT,
-        precioTotal FLOAT,
-        restaurante VARCHAR(255),
-        FOREIGN KEY(detallesPedidoID) REFERENCES Pedido(pedidoID),
-        FOREIGN KEY(platoID) REFERENCES Plato(platoID)
+        pedidoID INT,
+        FOREIGN KEY(platoID) REFERENCES Plato(platoID),
+        FOREIGN KEY(pedidoID) REFERENCES Pedido(pedidoID)
     )
     ''')
     conexion.commit()
     cursor.execute('''
     CREATE TABLE IF NOT EXISTS Suscripcion (
+        
         empresaID INT,
-        clienteID INT,
         fechaProximaPago DATE,
-        medioPago VARCHAR(255),
         estado VARCHAR(255),
         tipoSuscripcion VARCHAR(255),
         PRIMARY KEY (empresaID, clienteID),
@@ -196,20 +193,32 @@ def createTables(conexion, cursor):
     conexion.commit()
 
 def poblarClientes(data, conexion, cursor):
-    clave = ""
     ins.insertCliente(data[0],data[2],data[1],data[3],data[4],conexion,cursor)
 
+def poblarEmpresasDespacho(data, conexion, cursor):
+        ins.insertEmpresa(data[4], data[6], conexion, cursor)
 conexion = sqlite3.connect('grupo123e2')
 cursor = conexion.cursor()
 
 createTables(conexion, cursor)
 
+#POBLAR CLIENTES 
 path_clientes = os.path.join('datos', 'clientes.csv')
 clientes_datos = pd.read_csv(path_clientes, sep=';', header=0)
 clientes_datos = clientes_datos.values.tolist()
+
 for cliente in clientes_datos:
     poblarClientes(cliente, conexion, cursor)
     
+#POBLAR DESPACHADOR (DELIVERY)
+path_empresa_despacho = os.path.join('datos', 'cldeldes.csv')
+empresas_datos = pd.read_csv(path_empresa_despacho, sep=';', header=0)
+empresas_datos = empresas_datos.values.tolist()
+
+for empresa in empresas_datos:
+     if len(empresa)==13:
+         poblarEmpresasDespacho(empresa, conexion, cursor)
+#for 
 
 # función para agarrar todos los datos cliente
-# (nombre, numero_telefono, correo, clave, direccion, conexion, cursor)
+# 
