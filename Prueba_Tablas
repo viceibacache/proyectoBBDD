@@ -1,0 +1,17 @@
+import sqlite3
+conexion = sqlite3.connect('t1')
+cursor = conexion.cursor()
+cursor.execute('''
+CREATE TABLE IF NOT EXISTS t1 (
+    pedido INTEGER,
+    calificacion INTEGER
+)
+''')
+conexion.commit()
+
+cursor.execute('''
+INSERT INTO t1 (pedido, calificacion)
+VALUES (1,2)
+''')
+conexion.commit()
+
