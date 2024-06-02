@@ -1,10 +1,11 @@
 import sqlite3
 import pandas as pd
+import Inserts as ins
 
 def createTables(conexion, cursor):
     cursor.execute('''
     CREATE TABLE IF NOT EXISTS Persona (
-        PersonaID INT PRIMARY KEY,
+        personaID INT PRIMARY KEY,
         nombre VARCHAR(255),
         numero_telefono VARCHAR(255)
     )
@@ -22,7 +23,7 @@ def createTables(conexion, cursor):
     CREATE TABLE IF NOT EXISTS Despachador (
         despachadorID INT PRIMARY KEY,
         empresaID INT,
-        FOREIGN KEY(despachadorID) REFERENCES Persona(PersonaID),
+        FOREIGN KEY(despachadorID) REFERENCES Persona(personaID),
         FOREIGN KEY(empresaID) REFERENCES Empresa(empresaID)
     )
     ''')
@@ -32,7 +33,7 @@ def createTables(conexion, cursor):
         clienteID INT PRIMARY KEY,
         correo VARCHAR(255),
         clave VARCHAR(255),
-        FOREIGN KEY(clienteID) REFERENCES Persona(PersonaID)
+        FOREIGN KEY(clienteID) REFERENCES Persona(personaID)
     )
     ''')
     conexion.commit()
@@ -59,6 +60,7 @@ def createTables(conexion, cursor):
         platoID INT PRIMARY KEY,
         nombre VARCHAR(255),
         descripcion VARCHAR(255),
+        disponibilidad BOOLEAN,
         tamano VARCHAR(255),
         porcion INT,
         precio FLOAT,
@@ -72,8 +74,8 @@ def createTables(conexion, cursor):
     CREATE TABLE IF NOT EXISTS Ingrediente (
         ingredienteID INT PRIMARY KEY,
         nombre VARCHAR(255),
-        disponibilidad BOOLEAN,
-        infoContacto VARCHAR(255)
+        platoID INT,
+        FOREIGN KEY(platoID) REFERENCES Plato(platoID)
     )
     ''')
     conexion.commit()
@@ -119,17 +121,9 @@ def createTables(conexion, cursor):
     ''')
     conexion.commit()
 
-def loadClients(conexion, cursor, data):
-    for cliente in data:
-        num = cliente[2]
-        corr = cliente[1]
-        psw = cliente[3]
-        cursor.execute('''INSERT INTO Cliente (numero_telefono, correo, clave) VALUES (?,?)''', (num, corr, psw))
-        conexion.commit()
-
 conexion = sqlite3.connect('Cliente')
 cursor = conexion.cursor()
 
 createTables(conexion, cursor)
 
-clientes_df = pd.read_csv('datos\clientes.csv')
+clientes_datos = pd.read_csv('datos\clientes.csv').tolist()
