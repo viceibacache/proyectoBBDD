@@ -34,14 +34,10 @@ def insertDireccion(clienteID, direccion, conexion, cursor):
     conexion.commit()
 
 def insertEmpresa(nombre, infoContacto, conexion, cursor):
-    print("hola mundo")
-    print(nombre)
-    print(infoContacto)
     cursor.execute('''
             SELECT empresaID FROM Empresa WHERE nombre = ?
         ''', (nombre,))
     resultado = cursor.fetchone()
-    
     if not resultado:
         cursor.execute('''
             INSERT INTO Empresa (nombre, infoContacto) VALUES (?, ?)
@@ -59,17 +55,17 @@ def insertDespachador(nombre, numero_telefono, empresa, conexion, cursor):
     empresaID = cursor.fetchone()
 
     cursor.execute('''
-            INSERT INTO Despachador (despachadorID, empresaID,) VALUES (?, ?)
-        ''', (personaID, empresaID))
+            INSERT INTO Despachador (despachadorID, empresaID) VALUES (?, ?)
+        ''', (personaID, empresaID,))
     conexion.commit()
 
 def insertRestaurante(nombre, conexion, cursor): 
 
     cursor.execute(''' 
-        INSERT INTO  (nombre) VALUES (?)
-    ''', (nombre))
+        INSERT INTO Restaurante (nombre) VALUES (?)
+    ''', (nombre,))
     conexion.commit()
-
+#Nombre Restaurante, Telefono, Direccion
 def insertLocal(restaurante, infoContacto, direccion, conexion, cursor):
     cursor.execute('''
             SELECT restauranteID FROM Restaurante WHERE nombre = ?
@@ -78,23 +74,34 @@ def insertLocal(restaurante, infoContacto, direccion, conexion, cursor):
 
     cursor.execute(''' 
         INSERT INTO Local (restauranteID, infoContacto, direccion) VALUES (?, ?, ?)
-    ''', (restauranteID, infoContacto, direccion))
+    ''', (restauranteID, infoContacto, direccion,))
     conexion.commit()
-
-def insertPlato(nombre, descripcion, disponibilidad, tamano, porcion, precio, tiempoPreparacion, restaurante, ingredientes, conexion, cursor):
+#Nombre Plato, Descripcion, Disponibilidad, Porciones, Precio, Tiempo Preparacion, Nombre Restaurante, Lista de Ingredientes
+def insertPlato(nombre, descripcion, disponibilidad, porcion, precio, tiempoPreparacion, restaurante, ingredientes, conexion, cursor):
     cursor.execute('''
             SELECT restauranteID FROM Restaurante WHERE nombre = ?
         ''', (restaurante,))
     restauranteID = cursor.fetchone()[0]
 
     cursor.execute(''' 
-        INSERT INTO Plato (nombre, descripcion, disponibilidad, tamano, porcion, precio, tiempoPreparacion, restauranteID) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-    ''', (nombre, descripcion, disponibilidad, tamano, porcion, precio, tiempoPreparacion, restauranteID))
+        INSERT INTO Plato (nombre, descripcion, disponibilidad, porcion, precio, tiempoPreparacion, restauranteID) VALUES (?, ?, ?, ?, ?, ?, ?)
+    ''', (nombre, descripcion, disponibilidad, porcion, precio, tiempoPreparacion, restauranteID,))
     conexion.commit()
 
     platoID = cursor.lastrowid
-    for ingrediente in ingredientes:
-        insertIngrediente(ingrediente, platoID)
+    #ingrdientes_listos = []
+    if "(" in ingredientes:
+        None
+    else:
+        if ")" in ingredientes:
+            None
+        else:
+            lista_ingredientes = ingredientes.strip().split(",")
+            for ingrediente in lista_ingredientes:
+                #if ingrediente in ingrdientes_listos:
+                #    None
+                #else:
+                insertIngrediente(ingrediente, platoID, conexion, cursor)
 
 def insertIngrediente(nombre, platoID, conexion, cursor):
 
@@ -102,8 +109,8 @@ def insertIngrediente(nombre, platoID, conexion, cursor):
         INSERT INTO Ingrediente (nombre, platoID) VALUES (?, ?)
     ''', (nombre, platoID))
     conexion.commit()
-
-def insertPedido(clienteCorreo, despachador, fechaHora, estado, evaluacionCliente, evaluacionDespachador, platos, conexion, cursor):
+#correo del Cliente, nombre del despachador, fecha, hora, estado, evaluiacion cliente, evaluacion despachador, Lista de Ids de Platos
+def insertPedido(clienteCorreo, despachador, fecha, hora, estado, evaluacionCliente, evaluacionDespachador, platos, conexion, cursor):
     
     cursor.execute('''
             SELECT clienteID FROM Cliente WHERE correo = ?
@@ -116,8 +123,8 @@ def insertPedido(clienteCorreo, despachador, fechaHora, estado, evaluacionClient
     despachadorID = cursor.fetchone()[0]
 
     cursor.execute(''' 
-        INSERT INTO Pedido (clienteID, despachadorID, fechaHora, estado, evaluacionCliente, evaluacionDespachador) VALUES (?, ?, ?, ?, ?, ?)
-    ''', (clienteID, despachadorID, fechaHora, estado, evaluacionCliente, evaluacionDespachador))
+        INSERT INTO Pedido (clienteID, despachadorID, fechaHora, estado, evaluacionCliente, evaluacionDespachador) VALUES (?, ?, ?, ?, ?, ?,?)
+    ''', (clienteID, despachadorID, fecha, hora, estado, evaluacionCliente, evaluacionDespachador,))
     conexion.commit()
 
     pedidoID = cursor.lastrowid
@@ -129,12 +136,12 @@ def insertPlatoPedido(platoID, pedidoID, conexion, cursor):
         INSERT INTO platoPedido (platoID, pedidoID) VALUES (?, ?)
     ''', (platoID, pedidoID))
     conexion.commit()
-
-def insertSuscripcion(clienteCorreo, empresa, fechaProximaPago, estado, tipoSuscripcion, conexion, cursor):
+#correo del Cliente, nombre de la empresa, fecha del ultimo pago, estado, tipo de suscripcion
+def insertSuscripcion(clienteCorreo, empresa, fechaUltimoPago, estado, tipoSuscripcion, conexion, cursor):
     cursor.execute('''
             SELECT clienteID FROM Cliente WHERE correo = ?
         ''', (clienteCorreo,))
-    clienteID = cursor.fetchone()[0]
+    clienteID = cursor.fetchone()
 
     cursor.execute('''
             SELECT empresaID FROM Empresa WHERE nombre = ?
@@ -142,6 +149,6 @@ def insertSuscripcion(clienteCorreo, empresa, fechaProximaPago, estado, tipoSusc
     empresaID = cursor.fetchone()
 
     cursor.execute(''' 
-        INSERT INTO Pedido (clienteID, empresaID, fechaProximaPago, estado, tipoSuscripcion) VALUES (?, ?, ?, ?, ?)
-    ''', (clienteID, empresaID, fechaProximaPago, estado, tipoSuscripcion))
+        INSERT INTO Pedido (clienteID, empresaID, fechaUltimoPago, estado, tipoSuscripcion) VALUES (?, ?, ?, ?, ?)
+    ''', (clienteID, empresaID, fechaUltimoPago, estado, tipoSuscripcion))
     conexion.commit()
